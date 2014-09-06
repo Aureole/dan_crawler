@@ -276,10 +276,14 @@ def already_fetched(url):
         return True
     return False
 
+start_id = 0
+end_page_index = 50000
 def fetch():
     global url
     global start_page_index
     global end_page_index
+    global start_id
+    global max_count
     for i in range(start_page_index, end_page_index + 1):
         local_url = url + '/' + str(i)
         print '\nprocessing the page ' + str(i) 
@@ -291,21 +295,29 @@ def fetch():
         parser.clean_items()
         print 'elements number:', len(items), '\n'
         parse_and_save_all_item(items)
+        if start_id > max_count:
+            log('finished')
+            break
 
-start_id = 0
 def init_start_id():
     global start_id
-    global max_id
+    global max_count
     global save_path
-    for i in range(max_id):
+    for i in range(max_count):
         if not os.path.exists(save_path + str(i + 1)):
             start_id = i
             return
+    start_id = max_count + 1
 
 save_path = './images/'
-max_id = 10000
 start_page_index = 1
-end_page_index = 5
-init_start_id()
-load_fetched_urls()
-fetch()
+max_count = 20000 + 1000
+
+if __name__ == '__main__':
+    init_start_id()
+    if start_id >= max_count:
+        log('already have ' + str(max_count) + ' directories')
+        log('finished')
+    else:
+        load_fetched_urls()
+        fetch()
